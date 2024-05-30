@@ -49,7 +49,6 @@ D = 11.3e-2 #en m
 S = np.pi*(D/2)**2 #en m3
 C = 1
 N = 20000
-P = np.linspace(1, )
 h = 0.05
 n = 0.00108
 t = np.linspace(0, 100, N+1)
@@ -87,8 +86,18 @@ def euler():
 
 #euler()
 
+Patm =1.01325e5 #Pa
+K = 2.2e9 #Pa
+
+def Pression(z):
+    return 10* z + Patm
+
+def f2(z):
+    P = Pression(z)
+    return f1(min(profondeur))*(1+(P-Patm)/K)
+
 def correc(kp, ki, kd, z_cible):
-    V = mf/f1(0)
+    V = mf/1025.22
     for i in range(N):
         k1 = h*g(X[i], V)
         k2 = h*g(X[i] + k1/2, V)
@@ -98,8 +107,8 @@ def correc(kp, ki, kd, z_cible):
         y[i+1] = X[i+1][0]
         v[i+1] = X[i+1][1]
         V = mf / f1(y[i + 1])
-        V_prec = mf / f1(y[i])
-        dV = kp * (mf/f1(z_cible)-V) + ki*(mf/f1(z_cible)-V)*dt + kd * ((mf/f1(z_cible)-V) - (mf/f1(z_cible)-V_prec))/dt
+        V_prec = mf / f2(y[i])
+        dV = kp * (mf/f2(z_cible)-V) + ki*(mf/f2(z_cible)-V)*dt + kd * ((mf/f2(z_cible)-V) - (mf/f2(z_cible)-V_prec))/dt
         V += dV
     plt.plot(t, np.array(y), '--', label='Profondeur')
     plt.plot(t, v, label='vitesse')
