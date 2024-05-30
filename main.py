@@ -49,6 +49,7 @@ D = 11.3e-2 #en m
 S = np.pi*(D/2)**2 #en m3
 C = 1
 N = 20000
+P = np.linspace(1, )
 h = 0.05
 n = 0.00108
 t = np.linspace(0, 100, N+1)
@@ -108,3 +109,4 @@ def correc(kp, ki, kd, z_cible):
     plt.legend()
     plt.show()
 
+correc(1, 1, 1, 10)
