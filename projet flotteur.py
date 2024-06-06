@@ -103,7 +103,7 @@ def correc(kp, ki, kd, z_cible):
     V1[0] = V
     z_point = np.zeros(N+1)
     z_2point = np.zeros(N+1)
-    dVmax = 2.2578*dt
+    dVmax = 2.2578e-6*dt
     print(dVmax)
     for i in range(N):
         k1 = h*g(X[i], V)
