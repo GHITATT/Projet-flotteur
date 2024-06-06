@@ -115,11 +115,12 @@ def correc(kp, ki, kd, z_cible):
         v[i+1] = X[i+1][1]
         z_point[i+1] = (y[i+1]-y[i])/dt
         z_2point[i+1] = (z_point[i+1]-z_point[i])/dt
-        V = kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1]
+        dV = (kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1])
+        V += dV*dt
         V1[i+1] = V
-        dV = abs(V1[i+1] - V1[i])
-        if dV>dVmax:
-            V1[i+1] = V1[i] + dVmax*np.sign(V1[i+1] - V1[i])
+        #dV = abs(V1[i+1] - V1[i])
+        #if dV>dVmax:
+         #   V1[i+1] = V1[i] + dVmax*np.sign(V1[i+1] - V1[i])
     plt.plot(t, np.array(y), '--', label='Profondeur')
     plt.plot(t, v, label='vitesse')
     plt.xlabel("temps")
@@ -129,7 +130,7 @@ def correc(kp, ki, kd, z_cible):
     plt.show()
     plt.plot(t, np.array(V1), label='Volume')
     plt.xlabel("temps")
-    plt.title("z = f(t)")
+    plt.title("V = f(t)")
     plt.grid()
     plt.legend()
     plt.show()
@@ -167,4 +168,4 @@ def trajectoire(i, z_cible_tab, N_tab):
     return z_cible
 
 
-correc(1e-2, 0.5e-1, 3e-2, 350)
+correc(1e-1, 1e-2, 1e-1, 100)
