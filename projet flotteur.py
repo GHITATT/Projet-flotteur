@@ -43,12 +43,12 @@ def f1(depth):
     return f(depth)
 
 
-mf = 40 #en kg
+mf = 60 #en kg
 V = mf/f(10) #en m3
 D = 11.3e-2 #en m
 S = np.pi*(D/2)**2 #en m3
 C = 1
-N = 1000
+N = 100000
 h = 0.05
 n = 0.00108
 t = np.linspace(0, 100, N+1)
@@ -96,7 +96,10 @@ def f2(z):
     P = Pression(z)
     return 1025.22*(1+(P-Patm)/K)
 
-
+def regul_v(V):
+    Vmin = 60e-3
+    Vmax = 85e-3
+    return min(max(Vmin, V), Vmax)
 def correc(kp, ki, kd, z_cible):
     V = mf/1025.22
     V1 = np.zeros(N+1)
@@ -104,7 +107,7 @@ def correc(kp, ki, kd, z_cible):
     z_point = np.zeros(N+1)
     z_2point = np.zeros(N+1)
     dVmax = 2.2578e-6*dt
-    print(dVmax)
+    dV1 = np.zeros(N+1)
     for i in range(N):
         k1 = h*g(X[i], V)
         k2 = h*g(X[i] + k1/2, V)
@@ -116,6 +119,8 @@ def correc(kp, ki, kd, z_cible):
         z_point[i+1] = (y[i+1]-y[i])/dt
         z_2point[i+1] = (z_point[i+1]-z_point[i])/dt
         dV = (kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1])
+        dV = min(max(dV, -1e-5), 1e-5)
+        dV1[i+1] = dV
         V += dV*dt
         V1[i+1] = V
         #dV = abs(V1[i+1] - V1[i])
@@ -128,9 +133,10 @@ def correc(kp, ki, kd, z_cible):
     plt.grid()
     plt.legend()
     plt.show()
-    plt.plot(t, np.array(V1), label='Volume')
+    plt.plot(t, V1, label='Volume')
+    plt.plot(t, dV1, label='Débit')
     plt.xlabel("temps")
-    plt.title("V = f(t)")
+    plt.title("dV = f(t)")
     plt.grid()
     plt.legend()
     plt.show()
