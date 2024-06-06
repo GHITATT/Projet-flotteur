@@ -121,7 +121,7 @@ def correc(kp, ki, kd, z_cible):
     plt.grid()
     plt.legend()
     plt.show()
-    plt.plot(t, y-z_cible, label='Volume')
+    plt.plot(t, np.array(V1), label='Volume')
     plt.xlabel("temps")
     plt.title("z = f(t)")
     plt.grid()
@@ -161,4 +161,4 @@ def trajectoire(i, z_cible_tab, N_tab):
     return z_cible
 
 
-correc(1e-10, .01, 1e-5, 10)
+correc(1e-2, 0.5e-1, 3e-2, 300)
