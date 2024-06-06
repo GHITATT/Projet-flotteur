@@ -48,7 +48,7 @@ V = mf/f(10) #en m3
 D = 11.3e-2 #en m
 S = np.pi*(D/2)**2 #en m3
 C = 1
-N = 100000
+N = 1000
 h = 0.05
 n = 0.00108
 t = np.linspace(0, 100, N+1)
@@ -90,7 +90,7 @@ Patm =1.01325e5 #Pa
 K = 2.2e9 #Pa
 
 def Pression(z):
-    return 10 * z
+    return  z/10
 
 def f2(z):
     P = Pression(z)
@@ -99,6 +99,9 @@ def f2(z):
 
 def correc(kp, ki, kd, z_cible):
     V = mf/1025.22
+    V1 = [V]
+    z_point = np.zeros(N+1)
+    z_2point = np.zeros(N+1)
     for i in range(N):
         k1 = h*g(X[i], V)
         k2 = h*g(X[i] + k1/2, V)
@@ -107,10 +110,18 @@ def correc(kp, ki, kd, z_cible):
         X[i+1] = X[i] + (1/6)*(k1 + 2*k2 + 2*k3 + k4)
         y[i+1] = X[i+1][0]
         v[i+1] = X[i+1][1]
-        dV = kp * (mf/f2(z_cible) - mf/f2(y[i + 1])) + ki*(mf/f2(z_cible)-mf/f2(y[i + 1]))*dt + kd * ((mf/f2(z_cible)-mf/ f2(y[i + 1])) - (mf/f2(z_cible)- mf / f2(y[i])))/dt
-        V += dV
+        z_point[i+1] = (y[i+1]-y[i])/dt
+        z_2point[i+1] = (z_point[i+1]-z_point[i])/dt
+        V = kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1]
+        V1.append(V)
     plt.plot(t, np.array(y), '--', label='Profondeur')
     plt.plot(t, v, label='vitesse')
+    plt.xlabel("temps")
+    plt.title("z = f(t)")
+    plt.grid()
+    plt.legend()
+    plt.show()
+    plt.plot(t, y-z_cible, label='Volume')
     plt.xlabel("temps")
     plt.title("z = f(t)")
     plt.grid()
@@ -150,4 +161,4 @@ def trajectoire(i, z_cible_tab, N_tab):
     return z_cible
 
 
-correc(1, 1, 1, 10)
+correc(1e-10, .01, 1e-5, 10)
