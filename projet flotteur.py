@@ -99,9 +99,12 @@ def f2(z):
 
 def correc(kp, ki, kd, z_cible):
     V = mf/1025.22
-    V1 = [V]
+    V1 = np.zeros(N+1)
+    V1[0] = V
     z_point = np.zeros(N+1)
     z_2point = np.zeros(N+1)
+    dVmax = 2.2578*dt
+    print(dVmax)
     for i in range(N):
         k1 = h*g(X[i], V)
         k2 = h*g(X[i] + k1/2, V)
@@ -113,7 +116,10 @@ def correc(kp, ki, kd, z_cible):
         z_point[i+1] = (y[i+1]-y[i])/dt
         z_2point[i+1] = (z_point[i+1]-z_point[i])/dt
         V = kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1]
-        V1.append(V)
+        V1[i+1] = V
+        dV = abs(V1[i+1] - V1[i])
+        if dV>dVmax:
+            V1[i+1] = V1[i] + dVmax*np.sign(V1[i+1] - V1[i])
     plt.plot(t, np.array(y), '--', label='Profondeur')
     plt.plot(t, v, label='vitesse')
     plt.xlabel("temps")
@@ -161,4 +167,4 @@ def trajectoire(i, z_cible_tab, N_tab):
     return z_cible
 
 
-correc(1e-2, 0.5e-1, 3e-2, 300)
+correc(1e-2, 0.5e-1, 3e-2, 350)
