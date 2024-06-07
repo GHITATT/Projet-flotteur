@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import interpolate
+import math
 
 fichier = open("liste_rho.txt")
 lignes = fichier.readlines()
@@ -97,6 +98,18 @@ def f2(z):
     return 1025.22*(1+(P-Patm)/K)
 dVmax = (np.pi*(42.5e-3)**2) *0.3/120
 print(dVmax)
+
+nvm = 0.9
+pas = 5e-3  #en m
+diam= 25e-3 #en m
+tani = pas/(np.pi*diam)
+phi = math.atan(tani/nvm)-math.atan(tani)
+nem = math.tan(math.atan(tani)-phi)/tani
+print('nem', nem,"1/nem", 1/nem, 'nvm', nvm)
+
+
+
+
 def correc(kp, ki, kd, z_cible):
     V = mf/1025.22
     V1 = np.zeros(N+1)
@@ -105,6 +118,7 @@ def correc(kp, ki, kd, z_cible):
     z_2point = np.zeros(N+1)
     dVmax = 2.2578e-6*dt
     dV1 = np.zeros(N+1)
+    E = np.zeros(N+1)
     for i in range(N):
         k1 = h*g(X[i], V)
         k2 = h*g(X[i] + k1/2, V)
@@ -115,14 +129,15 @@ def correc(kp, ki, kd, z_cible):
         v[i+1] = X[i+1][1]
         z_point[i+1] = (y[i+1]-y[i])/dt
         z_2point[i+1] = (z_point[i+1]-z_point[i])/dt
-        if True or not i%5:
-            dV = (kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1])
-        else:
-            dV=0
+        dV = (kp * z_point[i+1] - ki*(z_cible - y[i + 1]) + kd * z_2point[i+1])
         dV = min(max(dV, -dVmax), dVmax)
         dV1[i+1] = dV
         V += dV*dt
         V1[i+1] = V
+        if dV>0:
+            E[i+1] = E[i] + dV*dt*Pression(y[i+1])*10**5/nem
+        if dV<0:
+            E[i+1] = E[i] + nvm*dV*dt*Pression(y[i+1])*10**5
     plt.plot(t, np.array(y), '--', label='Profondeur')
     plt.plot(t, v, label='vitesse')
     plt.xlabel("temps")
@@ -139,6 +154,12 @@ def correc(kp, ki, kd, z_cible):
     plt.plot(t, V1, label='Volume')
     plt.xlabel("temps")
     plt.title("dV = f(t)")
+    plt.grid()
+    plt.legend()
+    plt.show()
+    plt.plot(t, E, label='Energie')
+    plt.xlabel("temps")
+    plt.title("E = f(t)")
     plt.grid()
     plt.legend()
     plt.show()
@@ -174,6 +195,7 @@ def trajectoire(i, z_cible_tab, N_tab):
     else:
         z_cible = z_cible_tab[1]
     return z_cible
+
 
 
 correc(1e-4, 1e-7, 1e-2, 20)
